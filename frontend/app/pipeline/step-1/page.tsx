@@ -1,8 +1,20 @@
 'use client';
 
 import Link from 'next/link';
+import { useRef, useState } from 'react';
 
 export default function Step1UnggahData() {
+  // Ref untuk memicu klik pada input file tersembunyi
+  const genotypeInputRef = useRef<HTMLInputElement>(null);
+  const phenotypeInputRef = useRef<HTMLInputElement>(null);
+
+  // State untuk menyimpan berkas terpilih
+  const [genotypeFiles, setGenotypeFiles] = useState<FileList | null>(null);
+  const [phenotypeFile, setPhenotypeFile] = useState<File | null>(null);
+
+  // State untuk pesan notifikasi error
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const steps = [
     { id: 1, name: 'Unggah Data', active: true },
     { id: 2, name: 'Validasi Data', active: false },
@@ -16,11 +28,88 @@ export default function Step1UnggahData() {
     { id: 10, name: 'Simpan & Ekspor', active: false },
   ];
 
+  // Ekstensi yang diizinkan
+  const allowedGenotypeExts = ['bed', 'bim', 'fam', 'vcf', 'ped', 'map'];
+  const allowedPhenotypeExts = ['csv', 'tsv', 'txt'];
+
+  // Fungsi validasi file genotipe
+  const handleGenotypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorMessage(null);
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    let isValid = true;
+    for (let i = 0; i < files.length; i++) {
+      const ext = files[i].name.split('.').pop()?.toLowerCase();
+      if (!ext || !allowedGenotypeExts.includes(ext)) {
+        isValid = false;
+        break;
+      }
+    }
+
+    if (!isValid) {
+      setErrorMessage('Format file genotipe tidak sesuai! Harap unggah file berformat .bed, .bim, .fam, atau .vcf.');
+      if (genotypeInputRef.current) genotypeInputRef.current.value = '';
+      return;
+    }
+
+    setGenotypeFiles(files);
+  };
+
+  // Fungsi validasi file fenotipe
+  const handlePhenotypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorMessage(null);
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    const ext = file.name.split('.').pop()?.toLowerCase();
+
+    if (!ext || !allowedPhenotypeExts.includes(ext)) {
+      setErrorMessage('Format file fenotipe tidak sesuai! Harap unggah file berformat .csv, .tsv, atau .txt.');
+      if (phenotypeInputRef.current) phenotypeInputRef.current.value = '';
+      return;
+    }
+
+    setPhenotypeFile(file);
+  };
+
+  // Fungsi Batal / Hapus File Genotipe
+  const handleClearGenotype = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setGenotypeFiles(null);
+    if (genotypeInputRef.current) genotypeInputRef.current.value = '';
+  };
+
+  // Fungsi Batal / Hapus File Fenotipe
+  const handleClearPhenotype = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPhenotypeFile(null);
+    if (phenotypeInputRef.current) phenotypeInputRef.current.value = '';
+  };
+
   return (
     <div 
       suppressHydrationWarning 
       className="relative min-h-screen w-full bg-[#020617] text-white flex flex-col justify-between overflow-x-hidden font-sans"
     >
+      {/* INPUT FILE TERSEMBUNYI */}
+      <input
+        type="file"
+        ref={genotypeInputRef}
+        className="hidden"
+        multiple
+        accept=".bed,.bim,.fam,.vcf,.ped,.map"
+        onChange={handleGenotypeChange}
+      />
+      <input
+        type="file"
+        ref={phenotypeInputRef}
+        className="hidden"
+        accept=".csv,.tsv,.txt"
+        onChange={handlePhenotypeChange}
+      />
+
       {/* Background Gambar DNA */}
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
         <img 
@@ -104,19 +193,59 @@ export default function Step1UnggahData() {
             </p>
           </div>
 
+          {/* NOTIFIKASI ERROR WARNA MERAH */}
+          {errorMessage && (
+            <div className="mb-6 bg-rose-500/10 border border-rose-500/50 rounded-xl p-4 flex items-center justify-between text-xs text-rose-300 animate-fadeIn">
+              <div className="flex items-center gap-2.5">
+                <svg className="w-5 h-5 shrink-0 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>{errorMessage}</span>
+              </div>
+              <button 
+                onClick={() => setErrorMessage(null)} 
+                className="text-rose-400 hover:text-rose-200 font-bold ml-4 text-base"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <div className="space-y-6">
             {/* KARTU 1: FILE GENOTIPE */}
             <div className="bg-white rounded-xl p-6 text-slate-900 shadow-xl">
               <h2 className="text-xs font-bold text-slate-800 mb-3">
                 File Genotipe (.bed/.bim/.fam)
               </h2>
-              <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 transition cursor-pointer">
+              <div 
+                onClick={() => genotypeInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center transition cursor-pointer ${
+                  genotypeFiles && genotypeFiles.length > 0
+                    ? 'border-blue-400 bg-blue-50/50'
+                    : 'border-slate-300 bg-slate-50/50 hover:bg-slate-50'
+                }`}
+              >
                 <svg className="w-8 h-8 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                 </svg>
-                <p className="text-xs text-slate-500 font-medium">
-                  Upload File .bed, .bim, .fam
-                </p>
+                
+                {genotypeFiles && genotypeFiles.length > 0 ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-xs text-blue-700 font-semibold text-center">
+                      Terpilih ({genotypeFiles.length} berkas): {Array.from(genotypeFiles).map(f => f.name).join(', ')}
+                    </p>
+                    <button
+                      onClick={handleClearGenotype}
+                      className="mt-1 px-3 py-1 bg-rose-500 hover:bg-rose-600 text-white rounded-md text-[11px] font-medium transition flex items-center gap-1 shadow-sm"
+                    >
+                      <span>✕ Batal Upload</span>
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500 font-medium">
+                    Upload File .bed, .bim, .fam
+                  </p>
+                )}
               </div>
             </div>
 
@@ -125,13 +254,35 @@ export default function Step1UnggahData() {
               <h2 className="text-xs font-bold text-slate-800 mb-3">
                 File Fenotipe (CSV/TSV)
               </h2>
-              <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 transition cursor-pointer">
+              <div 
+                onClick={() => phenotypeInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center transition cursor-pointer ${
+                  phenotypeFile
+                    ? 'border-blue-400 bg-blue-50/50'
+                    : 'border-slate-300 bg-slate-50/50 hover:bg-slate-50'
+                }`}
+              >
                 <svg className="w-8 h-8 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                 </svg>
-                <p className="text-xs text-slate-500 font-medium">
-                  Upload File CSV/TSV
-                </p>
+                
+                {phenotypeFile ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-xs text-blue-700 font-semibold text-center">
+                      Terpilih: {phenotypeFile.name}
+                    </p>
+                    <button
+                      onClick={handleClearPhenotype}
+                      className="mt-1 px-3 py-1 bg-rose-500 hover:bg-rose-600 text-white rounded-md text-[11px] font-medium transition flex items-center gap-1 shadow-sm"
+                    >
+                      <span>✕ Batal Upload</span>
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500 font-medium">
+                    Upload File CSV/TSV
+                  </p>
+                )}
               </div>
             </div>
           </div>
