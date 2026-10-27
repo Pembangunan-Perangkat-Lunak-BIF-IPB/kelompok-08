@@ -1,6 +1,18 @@
 import { create } from 'zustand';
 
+// Interface untuk data Profil Pengguna
+export interface UserProfile {
+  fullName: string;
+  username: string;
+  email: string;
+  institution: string;
+  bio: string;
+}
+
 interface PipelineState {
+  // Profil Pengguna (Dinamis untuk Top Navbar & Halaman Profil)
+  userProfile: UserProfile;
+
   // Step 1 & 2: Files & Validation
   genotypeFile: File | null;
   phenotypeFile: File | null;
@@ -31,6 +43,7 @@ interface PipelineState {
   gwasResults: Array<{ chr: string; pos: number; snp: string; pvalue: number }>;
 
   // Actions
+  updateUserProfile: (profile: Partial<UserProfile>) => void;
   setGenotypeFile: (file: File | null) => void;
   setQualityControl: (config: Partial<PipelineState['qualityControl']>) => void;
   setPcaConfig: (config: Partial<PipelineState['pcaConfig']>) => void;
@@ -40,6 +53,15 @@ interface PipelineState {
 }
 
 export const usePipelineStore = create<PipelineState>((set) => ({
+  // Data Profil Default (Bisa digantikan fetch data dari backend)
+  userProfile: {
+    fullName: 'Nama Pengguna',
+    username: 'peneliti_gwas',
+    email: 'peneliti@institusi.ac.id',
+    institution: 'IPB University - Departemen Bioinformatika',
+    bio: 'Fokus pada analisis asosiasi tingkat genom (GWAS) dan integrasi pipeline komputasi data genomik skala besar.',
+  },
+
   genotypeFile: null,
   phenotypeFile: null,
   isValidated: false,
@@ -59,6 +81,12 @@ export const usePipelineStore = create<PipelineState>((set) => ({
   pvalThreshold: '5e-8 (Bonferroni)',
   significantSnpsCount: 0,
   gwasResults: [],
+
+  // Action untuk update profil dinamis
+  updateUserProfile: (profile) =>
+    set((state) => ({
+      userProfile: { ...state.userProfile, ...profile },
+    })),
 
   setGenotypeFile: (file) => set({ genotypeFile: file }),
   setQualityControl: (config) =>
