@@ -6,6 +6,7 @@ import { usePipelineStore } from '@/store/usePipelineStore';
 
 export default function Step7AnalisisGWAS() {
   const { 
+    userProfile,
     selectedModel, 
     setSelectedModel, 
     executionProgress, 
@@ -13,17 +14,14 @@ export default function Step7AnalisisGWAS() {
     updateExecution 
   } = usePipelineStore();
 
-  const userEmail = 'Nama Pengguna';
   const projectName = 'Diabetes_T2D_Cohort_2026';
 
   const getUserInitial = () => {
-    if (!userEmail) return 'NP';
-    return userEmail.charAt(0).toUpperCase();
+    if (!userProfile?.fullName) return 'N';
+    return userProfile.fullName.charAt(0).toUpperCase();
   };
 
-  // Simulasi log jika backend/WebSocket belum tersedia
   useEffect(() => {
-    // Jika belum ada log di store, isi dengan initial logs & jalankan simulasi progress
     if (logs.length === 0) {
       updateExecution(10, '[LOG 10:44:00] Initializing GWAS analysis environment...');
       
@@ -61,16 +59,11 @@ export default function Step7AnalisisGWAS() {
   ];
 
   return (
-    <div 
-      suppressHydrationWarning 
-      className="relative min-h-screen w-full bg-[#020617] text-white flex flex-col justify-between overflow-x-hidden font-sans"
-    >
-      {/* Background Gambar DNA */}
+    <div suppressHydrationWarning className="relative min-h-screen w-full bg-[#020617] text-white flex flex-col justify-between overflow-x-hidden font-sans">
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
         <img src="/dna-bg.jpeg" alt="DNA Background" className="w-full h-full object-cover" />
       </div>
 
-      {/* TOP NAVBAR */}
       <header className="relative z-10 w-full h-16 border-b border-slate-800/80 bg-[#020617]/80 backdrop-blur-md px-6 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
@@ -89,38 +82,23 @@ export default function Step7AnalisisGWAS() {
             <span>Project: </span>
             <span className="text-slate-300 font-mono">{projectName}</span>
           </div>
-          <div className="flex items-center gap-2 border-l border-slate-800 pl-6">
-            <div className="w-7 h-7 rounded-full bg-slate-700 text-slate-200 flex items-center justify-center font-bold text-xs">
+
+          <Link href="/profile" className="flex items-center gap-2 border-l border-slate-800 pl-6 hover:opacity-80 transition cursor-pointer group">
+            <div className="w-7 h-7 rounded-full bg-slate-700 group-hover:bg-blue-600 text-slate-200 flex items-center justify-center font-bold text-xs transition">
               {getUserInitial()}
             </div>
-            <span className="text-slate-200">{userEmail}</span>
-          </div>
+            <span className="text-slate-200 group-hover:text-blue-400 transition font-medium">
+              {userProfile.fullName}
+            </span>
+          </Link>
         </div>
       </header>
 
-      {/* MAIN CONTENT WRAPPER */}
       <div className="relative z-10 flex-1 flex w-full">
-        {/* SIDEBAR NAVIGATION */}
         <aside className="w-64 border-r border-slate-800/80 bg-[#020617]/60 backdrop-blur-sm p-4 flex flex-col gap-1 shrink-0">
           {steps.map((step) => (
-            <Link
-              key={step.id}
-              href={step.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition duration-150 ${
-                step.active
-                  ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
-              }`}
-            >
-              <span
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  step.completed
-                    ? 'bg-emerald-500 text-white'
-                    : step.active
-                    ? 'bg-white text-blue-600'
-                    : 'bg-slate-800 text-slate-400'
-                }`}
-              >
+            <Link key={step.id} href={step.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition duration-150 ${step.active ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step.completed ? 'bg-emerald-500 text-white' : step.active ? 'bg-white text-blue-600' : 'bg-slate-800 text-slate-400'}`}>
                 {step.completed ? (
                   <svg className="w-3 h-3 stroke-current" fill="none" viewBox="0 0 24 24" strokeWidth="3">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -134,7 +112,6 @@ export default function Step7AnalisisGWAS() {
           ))}
         </aside>
 
-        {/* MAIN PANEL */}
         <main className="flex-1 p-8 overflow-y-auto max-w-5xl space-y-6">
           <div>
             <h1 className="text-xl font-bold text-white mb-1">Analisis GWAS</h1>
@@ -144,11 +121,7 @@ export default function Step7AnalisisGWAS() {
           <div className="bg-white rounded-xl p-6 text-slate-900 shadow-xl space-y-6">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-2">Model Statistik</label>
-              <select
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
-              >
+              <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500">
                 <option value="Logistic Regression">Logistic Regression (Binary Phenotype)</option>
                 <option value="Linear Regression">Linear Regression (Quantitative Phenotype)</option>
                 <option value="Linear Mixed Model (LMM)">Linear Mixed Model / LMM (Population Structure Aware)</option>
@@ -161,10 +134,7 @@ export default function Step7AnalisisGWAS() {
                 <span className="text-blue-600 font-bold">{executionProgress}%</span>
               </div>
               <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div
-                  className="bg-blue-600 h-full transition-all duration-500 rounded-full"
-                  style={{ width: `${executionProgress}%` }}
-                ></div>
+                <div className="bg-blue-600 h-full transition-all duration-500 rounded-full" style={{ width: `${executionProgress}%` }}></div>
               </div>
             </div>
 
@@ -172,9 +142,7 @@ export default function Step7AnalisisGWAS() {
               <span className="block text-xs font-semibold text-slate-700">Terminal Output (Log Stream)</span>
               <div className="bg-slate-950 rounded-lg p-4 font-mono text-[11px] text-slate-300 h-52 overflow-y-auto space-y-1.5 border border-slate-800 shadow-inner">
                 {logs.map((log, idx) => (
-                  <p key={idx} className="text-emerald-400/90 leading-relaxed">
-                    {log}
-                  </p>
+                  <p key={idx} className="text-emerald-400/90 leading-relaxed">{log}</p>
                 ))}
               </div>
             </div>
@@ -182,14 +150,9 @@ export default function Step7AnalisisGWAS() {
         </main>
       </div>
 
-      {/* FOOTER NAVBAR */}
       <footer className="relative z-10 w-full h-16 border-t border-slate-800/80 bg-[#020617]/90 backdrop-blur-md px-6 flex items-center justify-between">
-        <Link href="/pipeline/step-6" className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition">
-          Kembali
-        </Link>
-        <Link href="/pipeline/step-8" className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition shadow-md shadow-blue-600/30">
-          Lanjut ke Post-Processing
-        </Link>
+        <Link href="/pipeline/step-6" className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition">Kembali</Link>
+        <Link href="/pipeline/step-8" className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition shadow-md shadow-blue-600/30">Lanjut ke Post-Processing</Link>
       </footer>
     </div>
   );

@@ -2,20 +2,21 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { usePipelineStore } from '@/store/usePipelineStore';
 
 export default function Step4KonfirmasiKonfigurasi() {
+  const { userProfile } = usePipelineStore();
+
   const [modelGwas, setModelGwas] = useState('Logistic Regression');
   const [parameterQC, setParameterQC] = useState('MAF >= 0.05, Call Rate >= 0.95');
 
-  const userEmail = 'Nama Pengguna';
   const projectName = 'Diabetes_T2D_Cohort_2026';
 
   const getUserInitial = () => {
-    if (!userEmail) return 'NP';
-    return userEmail.charAt(0).toUpperCase();
+    if (!userProfile?.fullName) return 'N';
+    return userProfile.fullName.charAt(0).toUpperCase();
   };
 
-  // Daftar seluruh step pipeline untuk sidebar navigation
   const steps = [
     { id: 1, name: 'Unggah Data', href: '/pipeline/step-1', completed: true, active: false },
     { id: 2, name: 'Validasi Data', href: '/pipeline/step-2', completed: true, active: false },
@@ -30,34 +31,17 @@ export default function Step4KonfirmasiKonfigurasi() {
   ];
 
   return (
-    <div 
-      suppressHydrationWarning 
-      className="relative min-h-screen w-full bg-[#020617] text-white flex flex-col justify-between overflow-x-hidden font-sans"
-    >
-      {/* Background Gambar DNA */}
+    <div suppressHydrationWarning className="relative min-h-screen w-full bg-[#020617] text-white flex flex-col justify-between overflow-x-hidden font-sans">
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-        <img 
-          src="/dna-bg.jpeg" 
-          alt="DNA Background" 
-          className="w-full h-full object-cover"
-        />
+        <img src="/dna-bg.jpeg" alt="DNA Background" className="w-full h-full object-cover" />
       </div>
 
-      {/* 1. TOP NAVBAR */}
       <header className="relative z-10 w-full h-16 border-b border-slate-800/80 bg-[#020617]/80 backdrop-blur-md px-6 flex items-center justify-between">
-        {/* Brand & Breadcrumb */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <img 
-              src="/GenoSphere Logo.png" 
-              alt="GenoSphere Logo" 
-              className="h-7 w-auto object-contain"
-            />
-            <span className="font-bold text-base tracking-wide text-white">
-              GenoSphere-GWAS
-            </span>
+            <img src="/GenoSphere Logo.png" alt="GenoSphere Logo" className="h-7 w-auto object-contain" />
+            <span className="font-bold text-base tracking-wide text-white">GenoSphere-GWAS</span>
           </div>
-          
           <div className="text-xs text-slate-400 border-l border-slate-800 pl-6 flex items-center gap-2">
             <span>Analysis Pipeline</span>
             <span>/</span>
@@ -65,49 +49,28 @@ export default function Step4KonfirmasiKonfigurasi() {
           </div>
         </div>
 
-        {/* Project Info & User Profile */}
         <div className="flex items-center gap-6 text-xs text-slate-400">
           <div>
             <span>Project: </span>
-            <span className="text-slate-300 font-mono">
-              {projectName}
-            </span>
+            <span className="text-slate-300 font-mono">{projectName}</span>
           </div>
-          <div className="flex items-center gap-2 border-l border-slate-800 pl-6">
-            <div className="w-7 h-7 rounded-full bg-slate-700 text-slate-200 flex items-center justify-center font-bold text-xs">
+
+          <Link href="/profile" className="flex items-center gap-2 border-l border-slate-800 pl-6 hover:opacity-80 transition cursor-pointer group">
+            <div className="w-7 h-7 rounded-full bg-slate-700 group-hover:bg-blue-600 text-slate-200 flex items-center justify-center font-bold text-xs transition">
               {getUserInitial()}
             </div>
-            <span className="text-slate-200">
-              {userEmail}
+            <span className="text-slate-200 group-hover:text-blue-400 transition font-medium">
+              {userProfile.fullName}
             </span>
-          </div>
+          </Link>
         </div>
       </header>
 
-      {/* 2. MAIN CONTENT WRAPPER */}
       <div className="relative z-10 flex-1 flex w-full">
-        
-        {/* SIDEBAR NAVIGATION (10 STEPS) */}
         <aside className="w-64 border-r border-slate-800/80 bg-[#020617]/60 backdrop-blur-sm p-4 flex flex-col gap-1 shrink-0">
           {steps.map((step) => (
-            <Link
-              key={step.id}
-              href={step.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition duration-150 ${
-                step.active
-                  ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
-              }`}
-            >
-              <span
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  step.completed
-                    ? 'bg-emerald-500 text-white'
-                    : step.active
-                    ? 'bg-white text-blue-600'
-                    : 'bg-slate-800 text-slate-400'
-                }`}
-              >
+            <Link key={step.id} href={step.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition duration-150 ${step.active ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step.completed ? 'bg-emerald-500 text-white' : step.active ? 'bg-white text-blue-600' : 'bg-slate-800 text-slate-400'}`}>
                 {step.completed ? (
                   <svg className="w-3 h-3 stroke-current" fill="none" viewBox="0 0 24 24" strokeWidth="3">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -121,126 +84,62 @@ export default function Step4KonfirmasiKonfigurasi() {
           ))}
         </aside>
 
-        {/* MAIN CONFIRMATION AREA */}
         <main className="flex-1 p-8 overflow-y-auto max-w-5xl">
           <div className="mb-6">
             <h1 className="text-xl font-bold text-white mb-1">Konfirmasi Konfigurasi</h1>
-            <p className="text-xs text-slate-400">
-              Tinjau ulang parameter sebelum pipeline dijalankan.
-            </p>
+            <p className="text-xs text-slate-400">Tinjau ulang parameter sebelum pipeline dijalankan.</p>
           </div>
 
-          {/* MAIN CARD */}
           <div className="bg-white rounded-xl p-6 text-slate-900 shadow-xl space-y-6">
-            
-            {/* BANNER WARNING AMBER */}
             <div className="p-3.5 bg-amber-50 border border-amber-200/80 rounded-lg flex items-center gap-2.5 text-xs text-amber-800">
               <span className="text-amber-600 text-sm">⚠️</span>
-              <span className="font-medium">
-                Tinjau Ulang Parameter Sebelum Analisis Dijalankan !
-              </span>
+              <span className="font-medium">Tinjau Ulang Parameter Sebelum Analisis Dijalankan !</span>
             </div>
 
-            {/* SEKSI RINGKASAN KONFIGURASI */}
             <div className="space-y-4">
-              <h2 className="text-sm font-bold text-slate-900">
-                Ringkasan Konfigurasi
-              </h2>
+              <h2 className="text-sm font-bold text-slate-900">Ringkasan Konfigurasi</h2>
 
-              {/* Data Genotipe */}
               <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
-                <label className="text-xs font-medium text-slate-500">
-                  Data Genotipe
-                </label>
-                <div className="md:col-span-2 bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs text-slate-700 font-mono">
-                  data_pasien.bed/bim/fam
-                </div>
+                <label className="text-xs font-medium text-slate-500">Data Genotipe</label>
+                <div className="md:col-span-2 bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs text-slate-700 font-mono">data_pasien.bed/bim/fam</div>
               </div>
 
-              {/* Data Fenotipe */}
               <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
-                <label className="text-xs font-medium text-slate-500">
-                  Data Fenotipe
-                </label>
-                <div className="md:col-span-2 bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs text-slate-700 font-mono">
-                  pheno_traits.csv
-                </div>
+                <label className="text-xs font-medium text-slate-500">Data Fenotipe</label>
+                <div className="md:col-span-2 bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs text-slate-700 font-mono">pheno_traits.csv</div>
               </div>
 
-              {/* Model GWAS */}
               <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
-                <label className="text-xs font-medium text-slate-500">
-                  Model GWAS
-                </label>
+                <label className="text-xs font-medium text-slate-500">Model GWAS</label>
                 <div className="md:col-span-2 relative">
-                  <select
-                    value={modelGwas}
-                    onChange={(e) => setModelGwas(e.target.value)}
-                    className="w-full appearance-none bg-white border border-slate-200 rounded-md px-3.5 py-2 text-xs text-slate-800 pr-10 focus:outline-none focus:border-blue-500 transition cursor-pointer"
-                  >
+                  <select value={modelGwas} onChange={(e) => setModelGwas(e.target.value)} className="w-full appearance-none bg-white border border-slate-200 rounded-md px-3.5 py-2 text-xs text-slate-800 pr-10 focus:outline-none focus:border-blue-500 transition cursor-pointer">
                     <option value="Logistic Regression">Logistic Regression</option>
                     <option value="Linear Regression">Linear Regression</option>
                     <option value="Linear Mixed Model (LMM)">Linear Mixed Model (LMM)</option>
                   </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                    </svg>
-                  </div>
                 </div>
               </div>
 
-              {/* Parameter QC */}
               <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
-                <label className="text-xs font-medium text-slate-500">
-                  Parameter QC
-                </label>
+                <label className="text-xs font-medium text-slate-500">Parameter QC</label>
                 <div className="md:col-span-2 relative">
-                  <select
-                    value={parameterQC}
-                    onChange={(e) => setParameterQC(e.target.value)}
-                    className="w-full appearance-none bg-white border border-slate-200 rounded-md px-3.5 py-2 text-xs text-slate-800 pr-10 focus:outline-none focus:border-blue-500 transition cursor-pointer"
-                  >
+                  <select value={parameterQC} onChange={(e) => setParameterQC(e.target.value)} className="w-full appearance-none bg-white border border-slate-200 rounded-md px-3.5 py-2 text-xs text-slate-800 pr-10 focus:outline-none focus:border-blue-500 transition cursor-pointer">
                     <option value="MAF >= 0.05, Call Rate >= 0.95">MAF &gt;= 0.05, Call Rate &gt;= 0.95</option>
                     <option value="MAF >= 0.01, Call Rate >= 0.90">MAF &gt;= 0.01, Call Rate &gt;= 0.90</option>
                     <option value="MAF >= 0.10, Call Rate >= 0.98">MAF &gt;= 0.10, Call Rate &gt;= 0.98</option>
                   </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                    </svg>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* INFO BOX CARD BLUE */}
-            <div className="p-3.5 bg-blue-50/80 border border-blue-100 rounded-lg text-xs text-blue-900 font-medium">
-              [ Varian terdeteksi: <strong className="font-bold">500,000</strong> | Estimasi: <strong className="font-bold">~3 Menit</strong> ]
-            </div>
-
+            <div className="p-3.5 bg-blue-50/80 border border-blue-100 rounded-lg text-xs text-blue-900 font-medium">[ Varian terdeteksi: <strong className="font-bold">500,000</strong> | Estimasi: <strong className="font-bold">~3 Menit</strong> ]</div>
           </div>
         </main>
-
       </div>
 
-      {/* 3. BOTTOM FOOTER NAVIGATION */}
       <footer className="relative z-10 w-full h-16 border-t border-slate-800/80 bg-[#020617]/90 backdrop-blur-md px-6 flex items-center justify-between">
-        {/* Tombol ke Step Sebelum (Step 3) */}
-        <Link
-          href="/pipeline/step-3"
-          className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition"
-        >
-          Kembali
-        </Link>
-
-        {/* Tombol ke Step Berikutnya (Step 5) */}
-        <Link
-          href="/pipeline/step-5"
-          className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition shadow-md shadow-blue-600/30"
-        >
-          Jalankan GWAS
-        </Link>
+        <Link href="/pipeline/step-3" className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition">Kembali</Link>
+        <Link href="/pipeline/step-5" className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition shadow-md shadow-blue-600/30">Jalankan GWAS</Link>
       </footer>
     </div>
   );
